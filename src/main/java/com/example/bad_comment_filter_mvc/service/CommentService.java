@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -25,7 +26,7 @@ public class CommentService {
                 .map(commentRepository::getCachedResults)
                 .toList();
 
-        List<CommentResponse> notCached =  cachedResults.stream()
+        List<CommentResponse> notCached = cachedResults.stream()
                 .filter(result -> Objects.isNull(result.labelPrediction()))
                 .toList();
 
@@ -33,7 +34,12 @@ public class CommentService {
                 .map(emptyResult -> commentRequests.get(emptyResult.id()).text())
                 .toList();
 
-        List<List<PredictionResult>> predictionResults = modelClient.send(modelPacket);
+        List<List<PredictionResult>> predictionResults;
+        if (modelPacket.isEmpty()) {
+            predictionResults = Collections.emptyList();
+        } else {
+            predictionResults = modelClient.send(modelPacket);
+        }
 
         commentRepository.save(modelPacket, predictionResults);
 

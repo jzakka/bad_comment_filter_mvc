@@ -2,6 +2,7 @@ package com.example.bad_comment_filter_mvc.service
 
 import com.example.bad_comment_filter_mvc.dto.CommentRequest
 import com.example.bad_comment_filter_mvc.dto.CommentResponse
+import com.example.bad_comment_filter_mvc.dto.PredictionResult
 import com.example.bad_comment_filter_mvc.exception.CommentIdInvalidException
 import com.example.bad_comment_filter_mvc.repository.CommentRepository
 import com.example.bad_comment_filter_mvc.restclient.ModelClient
@@ -20,12 +21,12 @@ class CommentServiceTest extends Specification {
                 new CommentRequest(2, "텍스트3"),
                 new CommentRequest(3, "텍스트4"),
         ]
-        commentRepository.getCachedResults(commentRequests[0]) >> new CommentResponse(0, [])
-        commentRepository.getCachedResults(commentRequests[1]) >> new CommentResponse(1, [])
-        commentRepository.getCachedResults(commentRequests[2]) >> new CommentResponse(2, [])
-        commentRepository.getCachedResults(commentRequests[3]) >> new CommentResponse(3, [])
+        commentRepository.getCachedResults(commentRequests[0]) >> new CommentResponse(0, [new PredictionResult("", 0)])
+        commentRepository.getCachedResults(commentRequests[1]) >> new CommentResponse(1, [new PredictionResult("", 0)])
+        commentRepository.getCachedResults(commentRequests[2]) >> new CommentResponse(2, [new PredictionResult("", 0)])
+        commentRepository.getCachedResults(commentRequests[3]) >> new CommentResponse(3, [new PredictionResult("", 0)])
         when:
-        commentService.getPredictionResults(commentRequests)
+        commentService.getPredictionResults(0,commentRequests)
         then:
         0 * modelClient.send(_)
     }
@@ -38,12 +39,12 @@ class CommentServiceTest extends Specification {
                 new CommentRequest(2, "텍스트3"),
                 new CommentRequest(3, "텍스트4"),
         ]
-        commentRepository.getCachedResults(commentRequests[0]) >> new CommentResponse(0, [])
-        commentRepository.getCachedResults(commentRequests[1]) >> new CommentResponse(1, [])
+        commentRepository.getCachedResults(commentRequests[0]) >> new CommentResponse(0, [new PredictionResult("", 0)])
+        commentRepository.getCachedResults(commentRequests[1]) >> new CommentResponse(1, [new PredictionResult("", 0)])
         commentRepository.getCachedResults(commentRequests[2]) >> new CommentResponse(2, null)
         commentRepository.getCachedResults(commentRequests[3]) >> new CommentResponse(3, null)
         when:
-        def predictionResults = commentService.getPredictionResults(commentRequests)
+        def predictionResults = commentService.getPredictionResults(0,commentRequests)
         then:
         1 * modelClient.send(_) >> [[],[]]
         predictionResults[0].id() == 0
@@ -60,12 +61,12 @@ class CommentServiceTest extends Specification {
                 new CommentRequest(2, "텍스트3"),
                 new CommentRequest(3, "텍스트4"),
         ]
-        commentRepository.getCachedResults(commentRequests[0]) >> new CommentResponse(0, [])
+        commentRepository.getCachedResults(commentRequests[0]) >> new CommentResponse(0, [new PredictionResult("", 0)])
         commentRepository.getCachedResults(commentRequests[1]) >> new CommentResponse(1, null)
         commentRepository.getCachedResults(commentRequests[2]) >> new CommentResponse(2, null)
-        commentRepository.getCachedResults(commentRequests[3]) >> new CommentResponse(3, [])
+        commentRepository.getCachedResults(commentRequests[3]) >> new CommentResponse(3, [new PredictionResult("", 0)])
         when:
-        def predictionResults = commentService.getPredictionResults(commentRequests)
+        def predictionResults = commentService.getPredictionResults(0,commentRequests)
         then:
         1 * modelClient.send(_) >> [[],[]]
         predictionResults[0].id() == 0
@@ -84,7 +85,7 @@ class CommentServiceTest extends Specification {
         ]
         commentRepository.getCachedResults(_) >> new CommentResponse(0, null)
         when:
-        commentService.getPredictionResults(commentRequests)
+        commentService.getPredictionResultsByBatch(commentRequests)
         then:
         def e = thrown(CommentIdInvalidException)
         e.message == CommentIdInvalidException.ERR_MESSAGE

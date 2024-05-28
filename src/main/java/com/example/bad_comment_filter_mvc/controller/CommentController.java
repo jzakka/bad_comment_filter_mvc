@@ -19,6 +19,6 @@ public class CommentController {
 
     @PostMapping(value = "/api/blind")
     public List<CommentResponse> blindBadComments(@RequestBody List<CommentRequest> commentRequests) {
-        return commentService.getPredictionResults(commentRequests);
+        return commentService.getPredictionResultsByBatch(commentRequests);
     }
 }

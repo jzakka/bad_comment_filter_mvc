@@ -1,5 +1,6 @@
 package com.example.bad_comment_filter_mvc.dto;
 
+import java.beans.Transient;
 import java.util.List;
 import java.util.Map;
 
@@ -10,5 +11,14 @@ public record CommentResponse(int id, List<PredictionResult> labelPrediction) {
                 .toList();
 
         return new CommentResponse(id, predictionResults);
+    }
+
+    public static CommentResponse emptyResponse(int id) {
+        return new CommentResponse(id, null);
+    }
+
+    @Transient
+    public boolean isEmpty() {
+        return labelPrediction == null || labelPrediction.isEmpty();
     }
 }

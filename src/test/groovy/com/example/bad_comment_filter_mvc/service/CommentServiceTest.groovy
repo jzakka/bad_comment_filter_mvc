@@ -90,4 +90,31 @@ class CommentServiceTest extends Specification {
         def e = thrown(CommentIdInvalidException)
         e.message == CommentIdInvalidException.ERR_MESSAGE
     }
+
+    def "BATCH_SIZE이상의 prediction result의 id가 뒤섞이지 않아야 함"() {
+        given:
+        List<CommentRequest> requests = new ArrayList()
+        for (i in 0..<100) {
+            requests.add(new CommentRequest(i, ""))
+        }
+        for (int i=1;i<100;i+=2) {
+            commentRepository.getCachedResults(requests.get(i)) >> new CommentResponse(i, [new PredictionResult("",0)])
+        }
+        for (int i=0;i<100;i+=2) {
+            commentRepository.getCachedResults(requests.get(i)) >> CommentResponse.emptyResponse(i)
+            modelClient.send(_) >> [
+                    [new PredictionResult("", 0)],
+                    [new PredictionResult("", 0)],
+                    [new PredictionResult("", 0)],
+                    [new PredictionResult("", 0)],
+                    [new PredictionResult("", 0)],
+            ]
+        }
+        when:
+        def result = commentService.getPredictionResultsByBatch(requests)
+        then:
+        for (i in 0..<100) {
+            result[i].id() == i
+        }
+    }
 }

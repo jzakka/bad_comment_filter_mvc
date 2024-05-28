@@ -65,7 +65,7 @@ public class CommentService {
 
         commentRepository.save(modelPacket, predictionResults);
 
-        return mergeResults(cachedResults, predictionResults);
+        return mergeResults(OFFSET, cachedResults, predictionResults);
     }
 
     private void idCheck(List<CommentRequest> commentRequests) {
@@ -77,7 +77,7 @@ public class CommentService {
         }
     }
 
-    private List<CommentResponse> mergeResults(List<CommentResponse> cachedResults, List<List<PredictionResult>> predictionResults) {
+    private List<CommentResponse> mergeResults(int offset, List<CommentResponse> cachedResults, List<List<PredictionResult>> predictionResults) {
         List<CommentResponse> mergedResult = new ArrayList<>(cachedResults);
 
         int predictResultsIdx = 0;
@@ -85,7 +85,7 @@ public class CommentService {
         for (int i = 0; i < mergedResult.size(); i++) {
             if (mergedResult.get(i).labelPrediction() == null) {
                 List<PredictionResult> labelPrediction = predictionResults.get(predictResultsIdx++);
-                CommentResponse commentResponse = new CommentResponse(i, labelPrediction);
+                CommentResponse commentResponse = new CommentResponse(offset+i, labelPrediction);
                 mergedResult.set(i, commentResponse);
             }
         }

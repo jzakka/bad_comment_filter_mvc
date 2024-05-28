@@ -3,6 +3,7 @@ package com.example.bad_comment_filter_mvc.service;
 import com.example.bad_comment_filter_mvc.dto.CommentRequest;
 import com.example.bad_comment_filter_mvc.dto.CommentResponse;
 import com.example.bad_comment_filter_mvc.dto.PredictionResult;
+import com.example.bad_comment_filter_mvc.exception.CommentIdInvalidException;
 import com.example.bad_comment_filter_mvc.repository.CommentRepository;
 import com.example.bad_comment_filter_mvc.restclient.ModelClient;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class CommentService {
 
 
     public List<CommentResponse> getPredictionResults(List<CommentRequest> commentRequests) {
+        idCheck(commentRequests);
         List<CommentResponse> cachedResults = commentRequests.stream()
                 .map(commentRepository::getCachedResults)
                 .toList();
@@ -44,6 +46,15 @@ public class CommentService {
         commentRepository.save(modelPacket, predictionResults);
 
         return mergeResults(cachedResults, predictionResults);
+    }
+
+    private void idCheck(List<CommentRequest> commentRequests) {
+        int size = commentRequests.size();
+        for (int i = 0; i < size; i++) {
+            if (commentRequests.get(i).id() != i) {
+                throw new CommentIdInvalidException();
+            }
+        }
     }
 
     private List<CommentResponse> mergeResults(List<CommentResponse> cachedResults, List<List<PredictionResult>> predictionResults) {

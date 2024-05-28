@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-@FeignClient(name = "NLPModelOpenFeign", url = "${model.url}/api/classify")
+@FeignClient(name = "NLPModelOpenFeign", url = "${model.url}")
 public interface ModelClient {
-    @PostMapping
+    @PostMapping("/api/classify")
     List<List<PredictionResult>> send(@RequestBody  List<String> packet);
 }

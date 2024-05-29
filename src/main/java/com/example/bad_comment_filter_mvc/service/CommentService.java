@@ -20,7 +20,7 @@ import java.util.stream.IntStream;
 @Service
 @RequiredArgsConstructor
 public class CommentService {
-    private static final int BATCH_SIZE = 10;
+    private static final int BATCH_SIZE = 4;
     private final CommentRepository commentRepository;
     private final ModelClient modelClient;
 
